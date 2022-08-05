@@ -16,7 +16,13 @@ namespace SynArmorAAFixMissingGenderWorldModel
 
         public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
-            //Your code here!
+            // set templates data
+            // iterate armors
+            // skip invalid
+            // get armor type to detect template
+            // get armor addon
+            // check world model path for female and male
+            // fix by substitute missing world model file subpath by subpath from template and write aa in patch
         }
     }
 }
