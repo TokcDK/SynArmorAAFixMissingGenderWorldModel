@@ -18,81 +18,13 @@ namespace SynArmorAAFixMissingGenderWorldModel
                 .Run(args);
         }
 
-        public class ArmorAddonPathsBySlot
-        {
-            //Armor\Studded\Male\boots_1.nif
-            public BipedObjectFlag SlotFlag;
-            public string? AAFemaleWorldModelPath;
-            public string? AAMaleWorldModelPath;
-        }
-        public class ArmorTemplate
-        {
-            public string? ArmorMaterialKeyword;
-            public readonly List<ArmorAddonPathsBySlot> BodyParts = new(4)
-            {
-                new ArmorAddonPathsBySlot(){ SlotFlag= BipedObjectFlag.Body },
-                new ArmorAddonPathsBySlot(){ SlotFlag= BipedObjectFlag.Hair },
-                new ArmorAddonPathsBySlot(){ SlotFlag= BipedObjectFlag.Hands },
-                new ArmorAddonPathsBySlot(){ SlotFlag= BipedObjectFlag.Feet },
-            };
-        }
-
-        //public class ArmorAddonPathsBySlot2
-        //{
-        //    //Armor\Studded\Male\boots_1.nif
-        //    public BipedObjectFlag SlotFlag;
-        //    public Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>?>? SlotArmorAddons;
-        //}
-        //public class ArmorTemplate2
-        //{
-        //    public FormLink<IKeywordGetter>? Keyword;
-        //    public readonly List<ArmorAddonPathsBySlot2> BodyParts = new(4)
-        //    {
-        //        new ArmorAddonPathsBySlot2(){ SlotFlag= BipedObjectFlag.Body },
-        //        new ArmorAddonPathsBySlot2(){ SlotFlag= BipedObjectFlag.Hair },
-        //        new ArmorAddonPathsBySlot2(){ SlotFlag= BipedObjectFlag.Hands },
-        //        new ArmorAddonPathsBySlot2(){ SlotFlag= BipedObjectFlag.Feet },
-        //    };
-        //}
-
-        // List<ArmorTemplate2> Templates = new List<ArmorTemplate2>();
-
         public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
-            //FormLink<IArmorGetter>? asdf = Mutagen.Bethesda.FormKeys.SkyrimLE.Skyrim.Armor.ArmorLeatherCuirass;
-            //FormLink<IKeywordGetter>? asdf1 = Mutagen.Bethesda.FormKeys.SkyrimLE.Skyrim.Keyword.ArmorMaterialLeather;
-
-            // set templates data
-            //// leather
-            var leatherTemplate = new ArmorTemplate();
-            leatherTemplate.ArmorMaterialKeyword = "ArmorMaterialLeather";
-            leatherTemplate.BodyParts[0].AAFemaleWorldModelPath = @"Armor\Studded\Female\body_1.nif";
-            leatherTemplate.BodyParts[0].AAMaleWorldModelPath = @"Armor\Studded\Male\body_1.nif";
-            leatherTemplate.BodyParts[1].AAFemaleWorldModelPath = @"Armor\Studded\Female\helmet_1.nif";
-            leatherTemplate.BodyParts[1].AAMaleWorldModelPath = @"Armor\Studded\Male\helmet_1.nif";
-            leatherTemplate.BodyParts[2].AAFemaleWorldModelPath = @"Armor\Studded\Female\gloves_1.nif";
-            leatherTemplate.BodyParts[2].AAMaleWorldModelPath = @"Armor\Studded\Male\gloves_1.nif";
-            leatherTemplate.BodyParts[3].AAFemaleWorldModelPath = @"Armor\Studded\Female\boots_1.nif";
-            leatherTemplate.BodyParts[3].AAMaleWorldModelPath = @"Armor\Studded\Male\boots_1.nif";
-
-            //ModKey skyrimModkey = ModKey.FromNameAndExtension("Skyrim.esm");
-            //if (!state.LoadOrder.TryGetValue(skyrimModkey, out IModListing<ISkyrimModGetter>? skyrimMod) || skyrimMod == null || skyrimMod.Mod == null)
-            //{
-            //    return;
-            //}
-
-            //HashSet<string> skipKeywords = new();
-            //skipKeywords.Add("ArmorLight");
-            //skipKeywords.Add("ArmorHeavy");
-            //skipKeywords.Add("ArmorCuirass");
-            //skipKeywords.Add("ArmorHelmet");
-            //skipKeywords.Add("ArmorGauntlets");
-            //skipKeywords.Add("ArmorBoots");
-            //skipKeywords.Add("VendorItemArmor");
-            //foreach (var armorGetter in skyrimMod.Mod.Armors)
-            //{
-            //    if (armorGetter == null) continue;
-            //}
+            if (Settings.Value.ArmorTemplateData.Count == 0)
+            {
+                Console.WriteLine($"Armor addons are not set. Exit..");
+                return;
+            }
 
             bool isIgnoreMods = Settings.Value.IgnoreMods.Count > 0;
             var ignoreModsList = Settings.Value.IgnoreMods;
@@ -109,12 +41,16 @@ namespace SynArmorAAFixMissingGenderWorldModel
                 if (armorGetter == null) continue;
                 if (armorGetter.MajorFlags.HasFlag(Armor.MajorFlag.NonPlayable)) continue;
                 if (armorGetter.MajorFlags.HasFlag(Armor.MajorFlag.Shield)) continue;
+                if (armorGetter.Keywords == null) continue;
                 if (armorGetter.BodyTemplate == null) continue;
                 if (armorGetter.BodyTemplate.Flags.HasFlag(BodyTemplate.Flag.NonPlayable)) continue;
 
+                var armorTemplateData = Settings.Value.ArmorTemplateData.FirstOrDefault(t => armorGetter.Keywords.Contains(t.Keyword) && t.SlotArmorAddons != null);
+                if (armorTemplateData == null) continue;
+
                 foreach (var aaFormlinkGetter in armorGetter.Armature)
                 {
-                    if (!aaFormlinkGetter.TryResolve(state.LinkCache, out var aa)) continue;
+                    if (!aaFormlinkGetter.TryResolve(state.LinkCache, out var aa) || aa == null) continue;
                     if (string.IsNullOrWhiteSpace(aa.EditorID)) continue;
                     if (aa.BodyTemplate == null) continue;
                     if (aa.WorldModel == null) continue;
@@ -126,30 +62,39 @@ namespace SynArmorAAFixMissingGenderWorldModel
                         && !string.IsNullOrWhiteSpace(aa.WorldModel.Male.File)
                             ) continue;
 
-                    var r = leatherTemplate.BodyParts.FirstOrDefault(r => aa.BodyTemplate.FirstPersonFlags.HasFlag(r.SlotFlag));
-                    if (r == null) continue;
-
-                    var aanew = state.PatchMod.ArmorAddons.GetOrAddAsOverride(aa);
-                    if (aa.WorldModel.Male == null || string.IsNullOrWhiteSpace(aa.WorldModel.Male.File))
+                    KeyValuePair<BipedObjectFlag, FormLink<IArmorAddonGetter>> r = new KeyValuePair<BipedObjectFlag, FormLink<IArmorAddonGetter>>();
+                    try
                     {
-                        Console.WriteLine($"Add male path to {aa.EditorID}|{aaFormlinkGetter.FormKey.ID}");
-                        aanew.WorldModel!.Male = new Model();
-                        aanew.WorldModel.Male.File = r.AAMaleWorldModelPath!;
+                        r = armorTemplateData.SlotArmorAddons!.First(f => f.Value != null && !f.Value.FormKey.IsNull && aa.BodyTemplate.FirstPersonFlags.HasFlag(f.Key));
                     }
-                    if (aa.WorldModel.Female == null || string.IsNullOrWhiteSpace(aa.WorldModel.Female.File))
+                    catch (InvalidOperationException)
                     {
-                        Console.WriteLine($"Add female path to {aa.EditorID}|{aaFormlinkGetter.FormKey.ID}");
-                        aanew.WorldModel!.Female = new Model();
-                        aanew.WorldModel.Female.File = r.AAFemaleWorldModelPath!;
+                        continue;
+                    }
+
+                    try
+                    {
+                        var templateArmorAddonGetter = r.Value.Resolve(state.LinkCache);
+
+                        var aanew = state.PatchMod.ArmorAddons.GetOrAddAsOverride(aa);
+                        if (aanew.WorldModel!.Male == null || string.IsNullOrWhiteSpace(aanew.WorldModel.Male!.File))
+                        {
+                            Console.WriteLine($"Add male path to '{aanew.EditorID}|{aanew.FormKey.ID}' from '{templateArmorAddonGetter.EditorID}|{templateArmorAddonGetter.FormKey.ID}'");
+
+                            aanew.WorldModel.Male = aanew.EditorID!.Contains("hair", StringComparison.InvariantCultureIgnoreCase) && aanew.WorldModel.Female != null && !string.IsNullOrWhiteSpace(aanew.WorldModel.Female.File) ? aanew.WorldModel.Female : new Model() { File = templateArmorAddonGetter.WorldModel!.Male!.File };
+                        }
+                        if (aanew.WorldModel.Female == null || string.IsNullOrWhiteSpace(aanew.WorldModel.Female!.File))
+                        {
+                            Console.WriteLine($"Add female path to '{aanew.EditorID}|{aanew.FormKey.ID}' from '{templateArmorAddonGetter.EditorID}|{templateArmorAddonGetter.FormKey.ID}'");
+
+                            aanew.WorldModel.Female = aanew.EditorID!.Contains("hair", StringComparison.InvariantCultureIgnoreCase) && aanew.WorldModel.Male != null && !string.IsNullOrWhiteSpace(aanew.WorldModel.Male.File) ? aanew.WorldModel.Male : new Model() { File = templateArmorAddonGetter.WorldModel!.Female!.File };
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"An error occered. Target AA'{aa.EditorID}|{aa.FormKey.ID}', template AA:'{r.Value.FormKey}'");
                     }
                 }
-
-                //if (!FormKey.TryFactory(armorGetter.Armature.First(), out var aa)) continue;
-
-                // get armor type to detect template
-                // get armor addon
-                // check world model path for female and male
-                // fix by substitute missing world model file subpath by subpath from template and write aa in patch
             }
         }
     }
