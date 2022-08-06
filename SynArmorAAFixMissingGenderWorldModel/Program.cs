@@ -21,7 +21,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
         public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
             // check custom armors list
-            if (Settings.Value.ArmorTemplateData.Count == 0)
+            if (Settings.Value.ArmorTemplates.Count == 0)
             {
                 Console.WriteLine($"Armor addons are not set. Exit..");
                 return;
@@ -30,7 +30,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
             int templateIndex = -1;
             var armorTemplate = new List<ArmorTemplate>();
             var addedKeywords = new HashSet<IKeywordGetter>();
-            foreach (var customTemplate in Settings.Value.ArmorTemplateData)
+            foreach (var customTemplate in Settings.Value.ArmorTemplates)
             {
                 templateIndex++;
 
@@ -55,7 +55,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
                     Console.WriteLine($"{nameof(addedKeywords)} already have added record with keyword '{keywordGetter}'.");
                     continue;
                 }
-                if (customTemplate.SlotArmorAddons==null)
+                if (customTemplate.SlotArmorAddonList==null)
                 {
                     Console.WriteLine($"Template #{templateIndex}|'{keywordGetter}' has null armor slotlists.");
                     continue;
@@ -64,7 +64,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
                 // check armor addons validness
                 int AAIndex = -1;
                 bool isAdd = true;
-                foreach(var customAA in customTemplate.SlotArmorAddons.Values)
+                foreach(var customAA in customTemplate.SlotArmorAddonList.Values)
                 {
                     AAIndex++;
 
@@ -143,7 +143,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
                 if (armorGetter.BodyTemplate == null) continue;
                 if (armorGetter.BodyTemplate.Flags.HasFlag(BodyTemplate.Flag.NonPlayable)) continue;
 
-                var armorTemplateData = armorTemplate.FirstOrDefault(t => armorGetter.Keywords.Contains(t.Keyword) && t.SlotArmorAddons != null);
+                var armorTemplateData = armorTemplate.FirstOrDefault(t => armorGetter.Keywords.Contains(t.Keyword) && t.SlotArmorAddonList != null);
                 if (armorTemplateData == null) continue;
 
                 foreach (var aaFormlinkGetter in armorGetter.Armature)
@@ -163,7 +163,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
                     KeyValuePair<BipedObjectFlag, FormLink<IArmorAddonGetter>> slotTemplateAAData = new KeyValuePair<BipedObjectFlag, FormLink<IArmorAddonGetter>>();
                     try
                     {
-                        slotTemplateAAData = armorTemplateData.SlotArmorAddons!.First(f => f.Value != null && !f.Value.FormKey.IsNull && aa.BodyTemplate.FirstPersonFlags.HasFlag(f.Key)); // ignore slots with not set formkeys
+                        slotTemplateAAData = armorTemplateData.SlotArmorAddonList!.First(f => f.Value != null && !f.Value.FormKey.IsNull && aa.BodyTemplate.FirstPersonFlags.HasFlag(f.Key)); // ignore slots with not set formkeys
                     }
                     catch (InvalidOperationException)
                     {

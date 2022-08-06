@@ -4,15 +4,19 @@ using Mutagen.Bethesda.Synthesis.Settings;
 
 namespace SynArmorAAFixMissingGenderWorldModel
 {
+    [SynthesisObjectNameMember("Armor template")]
     public class ArmorTemplate
     {
+        [SynthesisDiskName("Keyword")]
         public FormLink<IKeywordGetter>? Keyword;
-        public Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>? SlotArmorAddons;
+        [SynthesisDiskName("SlotArmorAddonList")]
+        public Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>? SlotArmorAddonList;
     }
 
     public class PatcherSettings
     {
         [SynthesisOrder]
+        [SynthesisDiskName("IgnoreMods")]
         [SynthesisSettingName("Ignore mods")]
         [SynthesisTooltip("Excluded mods")]
         // public string BaselineMod { get; set; } = "MyFacegenBaseline.esp";
@@ -26,14 +30,15 @@ namespace SynArmorAAFixMissingGenderWorldModel
         };
 
         [SynthesisOrder]
+        [SynthesisDiskName("ArmorTemplates")]
         [SynthesisTooltip("Data about keyword to detect and armor addons for slots")]
-        public List<ArmorTemplate> ArmorTemplateData = new()
+        public List<ArmorTemplate> ArmorTemplates = new()
         {
             // daedric
             new ArmorTemplate()
             {
                 Keyword=new FormLink<IKeywordGetter>(){ FormKey=FormKey.Factory("06BBD4:Skyrim.esm")},
-                SlotArmorAddons=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
+                SlotArmorAddonList=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
                 {
                     { BipedObjectFlag.Hair, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("098BB2:Skyrim.esm")} },
                     { BipedObjectFlag.Body, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("098BB3:Skyrim.esm")} },
@@ -46,7 +51,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
             new ArmorTemplate()
             {
                 Keyword=new FormLink<IKeywordGetter>(){ FormKey=FormKey.Factory("06BBD5:Skyrim.esm")},
-                SlotArmorAddons=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
+                SlotArmorAddonList=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
                 {
                     { BipedObjectFlag.Hair, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("06F948:Skyrim.esm")} },
                     { BipedObjectFlag.Body, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("06F94C:Skyrim.esm")} },
@@ -59,7 +64,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
             new ArmorTemplate()
             {
                 Keyword=new FormLink<IKeywordGetter>(){ FormKey=FormKey.Factory("06BBD6:Skyrim.esm")},
-                SlotArmorAddons=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
+                SlotArmorAddonList=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
                 {
                     { BipedObjectFlag.Hair, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("059E75:Skyrim.esm")} },
                     { BipedObjectFlag.Body, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("059E74:Skyrim.esm")} },
@@ -72,7 +77,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
             new ArmorTemplate()
             {
                 Keyword=new FormLink<IKeywordGetter>(){ FormKey=FormKey.Factory("06BBD8:Skyrim.esm")},
-                SlotArmorAddons=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
+                SlotArmorAddonList=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
                 {
                     { BipedObjectFlag.Hair, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("05B69A:Skyrim.esm")} },
                     { BipedObjectFlag.Body, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("05B69C:Skyrim.esm")} },
@@ -85,7 +90,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
             new ArmorTemplate()
             {
                 Keyword=new FormLink<IKeywordGetter>(){ FormKey=FormKey.Factory("06BBDC:Skyrim.esm")},
-                SlotArmorAddons=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
+                SlotArmorAddonList=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
                 {
                     { BipedObjectFlag.Hair, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("041381:Skyrim.esm")} },
                     { BipedObjectFlag.Body, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("04137F:Skyrim.esm")} },
@@ -98,7 +103,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
             new ArmorTemplate()
             {
                 Keyword=new FormLink<IKeywordGetter>(){ FormKey=FormKey.Factory("06BBDE:Skyrim.esm")},
-                SlotArmorAddons=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
+                SlotArmorAddonList=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
                 {
                     { BipedObjectFlag.Hair, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("01B39E:Skyrim.esm")} },
                     { BipedObjectFlag.Body, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("01B399:Skyrim.esm")} },
@@ -111,7 +116,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
             new ArmorTemplate()
             {
                 Keyword=new FormLink<IKeywordGetter>(){ FormKey=FormKey.Factory("06BBDA:Skyrim.esm")},
-                SlotArmorAddons=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
+                SlotArmorAddonList=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
                 {
                     { BipedObjectFlag.Hair, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("08969C:Skyrim.esm")} },
                     { BipedObjectFlag.Body, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("08969A:Skyrim.esm")} },
@@ -124,7 +129,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
             new ArmorTemplate()
             {
                 Keyword=new FormLink<IKeywordGetter>(){ FormKey=FormKey.Factory("06BBD9:Skyrim.esm")},
-                SlotArmorAddons=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
+                SlotArmorAddonList=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
                 {
                     { BipedObjectFlag.Hair, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("08969C:Skyrim.esm")} },
                     { BipedObjectFlag.Body, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("0896A2:Skyrim.esm")} },
@@ -137,7 +142,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
             new ArmorTemplate()
             {
                 Keyword=new FormLink<IKeywordGetter>(){ FormKey=FormKey.Factory("06BBD7:Skyrim.esm")},
-                SlotArmorAddons=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
+                SlotArmorAddonList=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
                 {
                     { BipedObjectFlag.Hair, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("03F7FF:Skyrim.esm")} },
                     { BipedObjectFlag.Body, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("03F7FE:Skyrim.esm")} },
@@ -150,7 +155,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
             new ArmorTemplate()
             {
                 Keyword=new FormLink<IKeywordGetter>(){ FormKey=FormKey.Factory("06BBE5:Skyrim.esm")},
-                SlotArmorAddons=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
+                SlotArmorAddonList=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
                 {
                     { BipedObjectFlag.Hair, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("036198:Skyrim.esm")} },
                     { BipedObjectFlag.Body, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("036195:Skyrim.esm")} },
@@ -163,7 +168,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
             new ArmorTemplate()
             {
                 Keyword=new FormLink<IKeywordGetter>(){ FormKey=FormKey.Factory("06BBE7:Skyrim.esm")},
-                SlotArmorAddons=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
+                SlotArmorAddonList=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
                 {
                     { BipedObjectFlag.Hair, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("0E4ADD:Skyrim.esm")} },
                     { BipedObjectFlag.Body, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("0E4AD7:Skyrim.esm")} },
@@ -176,7 +181,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
             new ArmorTemplate()
             {
                 Keyword=new FormLink<IKeywordGetter>(){ FormKey=FormKey.Factory("06BBE6:Skyrim.esm")},
-                SlotArmorAddons=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
+                SlotArmorAddonList=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
                 {
                     { BipedObjectFlag.Hair, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("0179B0:Skyrim.esm")} },
                     { BipedObjectFlag.Body, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("0179AE:Skyrim.esm")} },
@@ -189,7 +194,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
             new ArmorTemplate()
             {
                 Keyword=new FormLink<IKeywordGetter>(){ FormKey=FormKey.Factory("06BBE3:Skyrim.esm")},
-                SlotArmorAddons=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
+                SlotArmorAddonList=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
                 {
                     { BipedObjectFlag.Hair, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("012E4C:Skyrim.esm")} },
                     { BipedObjectFlag.Body, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("012E48:Skyrim.esm")} },
@@ -202,7 +207,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
             new ArmorTemplate()
             {
                 Keyword=new FormLink<IKeywordGetter>(){ FormKey=FormKey.Factory("06BBDD:Skyrim.esm")},
-                SlotArmorAddons=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
+                SlotArmorAddonList=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
                 {
                     { BipedObjectFlag.Hair, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("01B39D:Skyrim.esm")} },
                     { BipedObjectFlag.Body, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("01B397:Skyrim.esm")} },
@@ -215,7 +220,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
             new ArmorTemplate()
             {
                 Keyword=new FormLink<IKeywordGetter>(){ FormKey=FormKey.Factory("06BBDB:Skyrim.esm")},
-                SlotArmorAddons=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
+                SlotArmorAddonList=new Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>()
                 {
                     { BipedObjectFlag.Hair, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("03619C:Skyrim.esm")} },
                     { BipedObjectFlag.Body, new FormLink<IArmorAddonGetter>(){ FormKey=FormKey.Factory("036199:Skyrim.esm")} },
