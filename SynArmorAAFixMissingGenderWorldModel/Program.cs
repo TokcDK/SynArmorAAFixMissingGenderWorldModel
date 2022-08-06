@@ -55,7 +55,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
                     Console.WriteLine($"{nameof(addedKeywords)} already have added record with keyword '{keywordGetter}'.");
                     continue;
                 }
-                if (customTemplate.SlotArmorAddonList==null)
+                if (customTemplate.SlotArmorAddonPairs==null)
                 {
                     Console.WriteLine($"Template #{templateIndex}|'{keywordGetter}' has null armor slotlists.");
                     continue;
@@ -64,7 +64,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
                 // check armor addons validness
                 int AAIndex = -1;
                 bool isAdd = true;
-                foreach(var customAA in customTemplate.SlotArmorAddonList.Values)
+                foreach(var customAA in customTemplate.SlotArmorAddonPairs.Values)
                 {
                     AAIndex++;
 
@@ -143,7 +143,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
                 if (armorGetter.BodyTemplate == null) continue;
                 if (armorGetter.BodyTemplate.Flags.HasFlag(BodyTemplate.Flag.NonPlayable)) continue;
 
-                var armorTemplateData = armorTemplate.FirstOrDefault(t => armorGetter.Keywords.Contains(t.Keyword) && t.SlotArmorAddonList != null);
+                var armorTemplateData = armorTemplate.FirstOrDefault(t => armorGetter.Keywords.Contains(t.Keyword) && t.SlotArmorAddonPairs != null);
                 if (armorTemplateData == null) continue;
 
                 foreach (var aaFormlinkGetter in armorGetter.Armature)
@@ -163,7 +163,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
                     KeyValuePair<BipedObjectFlag, FormLink<IArmorAddonGetter>> slotTemplateAAData = new KeyValuePair<BipedObjectFlag, FormLink<IArmorAddonGetter>>();
                     try
                     {
-                        slotTemplateAAData = armorTemplateData.SlotArmorAddonList!.First(f => f.Value != null && !f.Value.FormKey.IsNull && aa.BodyTemplate.FirstPersonFlags.HasFlag(f.Key)); // ignore slots with not set formkeys
+                        slotTemplateAAData = armorTemplateData.SlotArmorAddonPairs!.First(f => f.Value != null && !f.Value.FormKey.IsNull && aa.BodyTemplate.FirstPersonFlags.HasFlag(f.Key)); // ignore slots with not set formkeys
                     }
                     catch (InvalidOperationException)
                     {
