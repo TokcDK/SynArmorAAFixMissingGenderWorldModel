@@ -20,9 +20,107 @@ namespace SynArmorAAFixMissingGenderWorldModel
 
         public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
+            // check custom armors list
             if (Settings.Value.ArmorTemplateData.Count == 0)
             {
                 Console.WriteLine($"Armor addons are not set. Exit..");
+                return;
+            }
+            // check custom armors data and add only valid else show info
+            int templateIndex = -1;
+            var armorTemplate = new List<ArmorTemplate>();
+            var addedKeywords = new HashSet<IKeywordGetter>();
+            foreach (var customTemplate in Settings.Value.ArmorTemplateData)
+            {
+                templateIndex++;
+
+                // check valid of main properties
+                if (customTemplate==null)
+                {
+                    Console.WriteLine($"Template #{templateIndex} is null.");
+                    continue;
+                }
+                if (customTemplate.Keyword == null)
+                {
+                    Console.WriteLine($"Template #{templateIndex} has null keyword.");
+                    continue;
+                }
+                if (!customTemplate.Keyword.TryResolve(state.LinkCache, out var keywordGetter))
+                {
+                    Console.WriteLine($"Template #{templateIndex} has invalid keyword.");
+                    continue;
+                }
+                if (addedKeywords.Contains(keywordGetter))
+                {
+                    Console.WriteLine($"{nameof(addedKeywords)} already have added record with keyword '{keywordGetter}'.");
+                    continue;
+                }
+                if (customTemplate.SlotArmorAddons==null)
+                {
+                    Console.WriteLine($"Template #{templateIndex}|'{keywordGetter}' has null armor slotlists.");
+                    continue;
+                }
+
+                // check armor addons validness
+                int AAIndex = -1;
+                bool isAdd = true;
+                foreach(var customAA in customTemplate.SlotArmorAddons.Values)
+                {
+                    AAIndex++;
+
+                    if (customAA == null || customAA.FormKey.IsNull) continue; // ignore not set formkey for AA biped slot
+
+                    if (!customAA.TryResolve(state.LinkCache, out var customAAGetter))
+                    {
+                        Console.WriteLine($"Armor addon #{AAIndex} for template keyword {keywordGetter} failed to get AAGetter.");
+                        isAdd = false;
+                        continue;
+                    }
+
+                    if (customAAGetter.WorldModel==null)
+                    {
+                        Console.WriteLine($"Armor addon #{AAIndex} for template keyword {keywordGetter} has Null World model data.");
+                        isAdd = false;
+                        continue;
+                    }
+
+                    if (customAAGetter.WorldModel.Female==null)
+                    {
+                        Console.WriteLine($"Armor addon #{AAIndex} for template keyword {keywordGetter} has Null Female world model data.");
+                        isAdd = false;
+                        continue;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(customAAGetter.WorldModel.Female.File))
+                    {
+                        Console.WriteLine($"Armor addon #{AAIndex} for template keyword {keywordGetter} has Null or Empty Female world model File path.");
+                        isAdd = false;
+                        continue;
+                    }
+
+                    if (customAAGetter.WorldModel.Male==null)
+                    {
+                        Console.WriteLine($"Armor addon #{AAIndex} for template keyword {keywordGetter} has Null Male world model data.");
+                        isAdd = false;
+                        continue;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(customAAGetter.WorldModel.Male.File))
+                    {
+                        Console.WriteLine($"Armor addon #{AAIndex} for template keyword {keywordGetter} has Null or Empty Male world model File path.");
+                        isAdd = false;
+                        continue;
+                    }
+                }
+
+                addedKeywords.Add(keywordGetter);
+                if (isAdd) armorTemplate.Add(customTemplate);
+            }
+
+            // check custom armors list after check data
+            if (armorTemplate.Count == 0)
+            {
+                Console.WriteLine($"Armor addons after check data is empty. Exit..");
                 return;
             }
 
@@ -45,7 +143,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
                 if (armorGetter.BodyTemplate == null) continue;
                 if (armorGetter.BodyTemplate.Flags.HasFlag(BodyTemplate.Flag.NonPlayable)) continue;
 
-                var armorTemplateData = Settings.Value.ArmorTemplateData.FirstOrDefault(t => armorGetter.Keywords.Contains(t.Keyword) && t.SlotArmorAddons != null);
+                var armorTemplateData = armorTemplate.FirstOrDefault(t => armorGetter.Keywords.Contains(t.Keyword) && t.SlotArmorAddons != null);
                 if (armorTemplateData == null) continue;
 
                 foreach (var aaFormlinkGetter in armorGetter.Armature)
@@ -62,10 +160,10 @@ namespace SynArmorAAFixMissingGenderWorldModel
                         && !string.IsNullOrWhiteSpace(aa.WorldModel.Male.File)
                             ) continue;
 
-                    KeyValuePair<BipedObjectFlag, FormLink<IArmorAddonGetter>> r = new KeyValuePair<BipedObjectFlag, FormLink<IArmorAddonGetter>>();
+                    KeyValuePair<BipedObjectFlag, FormLink<IArmorAddonGetter>> slotTemplateAAData = new KeyValuePair<BipedObjectFlag, FormLink<IArmorAddonGetter>>();
                     try
                     {
-                        r = armorTemplateData.SlotArmorAddons!.First(f => f.Value != null && !f.Value.FormKey.IsNull && aa.BodyTemplate.FirstPersonFlags.HasFlag(f.Key));
+                        slotTemplateAAData = armorTemplateData.SlotArmorAddons!.First(f => f.Value != null && !f.Value.FormKey.IsNull && aa.BodyTemplate.FirstPersonFlags.HasFlag(f.Key)); // ignore slots with not set formkeys
                     }
                     catch (InvalidOperationException)
                     {
@@ -74,7 +172,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
 
                     try
                     {
-                        var templateArmorAddonGetter = r.Value.Resolve(state.LinkCache);
+                        if (!slotTemplateAAData.Value.TryResolve(state.LinkCache, out var templateArmorAddonGetter)) continue; // templateAA is not resolved
 
                         var aanew = state.PatchMod.ArmorAddons.GetOrAddAsOverride(aa);
                         if (aanew.WorldModel!.Male == null || string.IsNullOrWhiteSpace(aanew.WorldModel.Male!.File))
@@ -92,7 +190,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"An error occered. Target AA'{aa.EditorID}|{aa.FormKey.ID}', template AA:'{r.Value.FormKey}'");
+                        Console.WriteLine($"An error occured. Target AA'{aa.EditorID}|{aa.FormKey.ID}', template AA:'{slotTemplateAAData.Value.FormKey}'. Error: {ex.Message}");
                     }
                 }
             }
