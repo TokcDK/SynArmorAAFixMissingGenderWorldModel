@@ -8,8 +8,10 @@ namespace SynArmorAAFixMissingGenderWorldModel
     public class ArmorTemplate
     {
         [SynthesisDiskName("Keyword")]
+        [SynthesisTooltip("Keyword for armor material, using to detect which template need to be used.")]
         public FormLink<IKeywordGetter>? Keyword;
         [SynthesisDiskName("SlotArmorAddonPairs")]
+        [SynthesisTooltip("Select armor addon for slots you need.\nUsually Body,Hair,LongHair,Hands,Feet.\nSlot will be used to detect required armor addon.")]
         public Dictionary<BipedObjectFlag, FormLink<IArmorAddonGetter>>? SlotArmorAddonPairs;
     }
 
@@ -18,7 +20,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
         [SynthesisOrder]
         [SynthesisDiskName("IgnoreMods")]
         [SynthesisSettingName("Ignore mods")]
-        [SynthesisTooltip("Excluded mods")]
+        [SynthesisTooltip("All armors from this mods will be ignored")]
         // public string BaselineMod { get; set; } = "MyFacegenBaseline.esp";
         public HashSet<ModKey> IgnoreMods = new() 
         { 
@@ -31,7 +33,7 @@ namespace SynArmorAAFixMissingGenderWorldModel
 
         [SynthesisOrder]
         [SynthesisDiskName("ArmorTemplates")]
-        [SynthesisTooltip("Data about keyword to detect and armor addons for slots")]
+        [SynthesisTooltip("Enter here Material Keyword and Armor addon for main slots if.\n They will be used to fill missing data in target armor addons.")]
         public List<ArmorTemplate> ArmorTemplates = new()
         {
             // daedric
